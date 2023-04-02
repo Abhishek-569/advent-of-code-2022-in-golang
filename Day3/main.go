@@ -4,50 +4,73 @@ import (
     "bufio"
     "fmt"
     "os"
-    "strings"
 )
 
 func main() {
+    // Open the input file for reading
     file, err := os.Open("input3.txt")
-
     if err != nil {
-        fmt.Println(err)
-        return
+        panic(err)
     }
-
     defer file.Close()
 
+    // Create a scanner to read the file line by line
     scanner := bufio.NewScanner(file)
 
-    sum := 0
+    // Keep track of the current group of lines being processed
+    var lines []string
+    totalSum := 0
+
+    // Read the lines from the file and group them into sets of 3
     for scanner.Scan() {
         line := scanner.Text()
-
-        // split each line in two equal parts of string
-        // and find common characters and save them in a slice
-        var common []string
-
-        //convert findCommonChar function output to string and append it to common slice
-        common = append(common, string(findCommonChar(line[:len(line)/2], line[len(line)/2:])))
-
-        // replace a-z with 1-26 and A-Z with 27-52 in common slice and add them in sum
-        for _, v := range common {
-            if v >= "a" && v <= "z" {
-                sum += int(v[0]) - 96
-            } else if v >= "A" && v <= "Z" {
-                sum += int(v[0]) - 38
+        lines = append(lines, line)
+        if len(lines) == 3 {
+            // Find the common character in the current group of lines
+            common := findCommonCharacter(lines[0], lines[1], lines[2])
+            //for a-z add 1-26 and for A-Z add  27-52 add into total sum
+            for _, r := range common {
+                if r >= 'a' && r <= 'z' {
+                    totalSum += int(r - 'a' + 1)
+                } else if r >= 'A' && r <= 'Z' {
+                    totalSum += int(r - 'A' + 27)
+                }
             }
-        }
 
+            // Reset the lines buffer for the next group
+            lines = []string{}
+        }
     }
-    fmt.Println(sum)
+
+    // Check for any errors that occurred during scanning
+    if err := scanner.Err(); err != nil {
+        panic(err)
+    }
+    fmt.Println(totalSum)
 }
 
-func findCommonChar(str1 string, str2 string) rune {
-    for _, ch := range str1 {
-        if strings.ContainsRune(str2, ch) {
-            return ch
+// Helper function to find the common character in 3 strings
+func findCommonCharacter(s1, s2, s3 string) string {
+    // Convert the strings to sets of runes (characters)
+    set1 := make(map[rune]bool)
+    for _, r := range s1 {
+        set1[r] = true
+    }
+    set2 := make(map[rune]bool)
+    for _, r := range s2 {
+        set2[r] = true
+    }
+    set3 := make(map[rune]bool)
+    for _, r := range s3 {
+        set3[r] = true
+    }
+
+    // Find the intersection of the 3 sets
+    for r := range set1 {
+        if set2[r] && set3[r] {
+            return string(r)
         }
     }
-    return 0 // If no common character is found
+    // If no common character was found, return an empty string
+    return ""
 }
