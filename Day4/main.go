@@ -36,5 +36,5 @@ func main() {
 	fmt.Println(count)
 }
 func range_contains_range(a, b, c, d int) bool {
-	return ((a <= c && c <= b) && (a <= d && d <= b)) || ((c <= a && a <= d) && (c <= b && b <= d))
+	return (a <= c && c <= b) || (a <= d && d <= b) || (c <= a && a <= d) || (c <= b && b <= d)
 }
